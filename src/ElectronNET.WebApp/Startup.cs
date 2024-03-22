@@ -1,7 +1,9 @@
 ﻿using ElectronNET.API;
 using ElectronNET.API.Entities;
+using ElectronNET.WebApp.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,6 +24,9 @@ namespace ElectronNET.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddDbContext<HotelContext>(p => p.UseNpgsql("Server=localhost;Database=Hotel;Port=5432;User Id=master;Password=master;Ssl Mode=Require;"));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,7 +76,7 @@ namespace ElectronNET.WebApp
             Electron.App.On("activate", (obj) =>
             {
                 // obj should be a boolean that represents where there are active windows or not.
-                var hasWindows = (bool) obj;
+                var hasWindows = (bool)obj;
 
                 Electron.Notification.Show(
                     new NotificationOptions("Activate", $"activate event has been captured. Active windows = {hasWindows}")

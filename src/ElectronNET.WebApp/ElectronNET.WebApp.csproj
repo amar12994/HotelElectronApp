@@ -7,12 +7,16 @@
     <TypeScriptToolsVersion>4.2</TypeScriptToolsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="ElectronHostHook\**" />
+    <Content Remove="ElectronHostHook\**" />
+    <EmbeddedResource Remove="ElectronHostHook\**" />
+    <None Remove="ElectronHostHook\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Controllers\ManageWindowsController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Remove="Views\Windows\HandleErrorCrashes.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="ElectronNET.API" Version="23.6.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.16" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.410601">
@@ -20,6 +24,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.6" />
     <PackageReference Include="SocketIOClient" Version="3.0.8" />
     <PackageReference Include="SocketIOClient.Newtonsoft.Json" Version="3.0.7" />
   </ItemGroup>
@@ -35,17 +40,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Update="ElectronHostHook\**\*.*">
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Content Update="electron.manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\" />
     <Folder Include="Models\" />
     <Folder Include="Pages\" />
     <Folder Include="wwwroot\images\" />

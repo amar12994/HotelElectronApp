@@ -13,19 +13,19 @@ namespace ElectronNET.WebApp.Controllers
             {
                 Electron.App.Ready += () => CreateContextMenu();
 
-                var menu = new MenuItem[] {
-                new MenuItem { Label = "Edit", Submenu = new MenuItem[] {
-                    new MenuItem { Label = "Undo", Accelerator = "CmdOrCtrl+Z", Role = MenuRole.undo },
-                    new MenuItem { Label = "Redo", Accelerator = "Shift+CmdOrCtrl+Z", Role = MenuRole.redo },
-                    new MenuItem { Type = MenuType.separator },
-                    new MenuItem { Label = "Cut", Accelerator = "CmdOrCtrl+X", Role = MenuRole.cut },
-                    new MenuItem { Label = "Copy", Accelerator = "CmdOrCtrl+C", Role = MenuRole.copy },
-                    new MenuItem { Label = "Paste", Accelerator = "CmdOrCtrl+V", Role = MenuRole.paste },
-                    new MenuItem { Label = "Select All", Accelerator = "CmdOrCtrl+A", Role = MenuRole.selectall }
+                var menu = new API.Entities.MenuItem[] {
+                new API.Entities.MenuItem { Label = "Edit", Submenu = new API.Entities.MenuItem[] {
+                    new API.Entities.MenuItem { Label = "Undo", Accelerator = "CmdOrCtrl+Z", Role = MenuRole.undo },
+                    new API.Entities.MenuItem { Label = "Redo", Accelerator = "Shift+CmdOrCtrl+Z", Role = MenuRole.redo },
+                    new API.Entities.MenuItem { Type = MenuType.separator },
+                    new API.Entities.MenuItem { Label = "Cut", Accelerator = "CmdOrCtrl+X", Role = MenuRole.cut },
+                    new API.Entities.MenuItem { Label = "Copy", Accelerator = "CmdOrCtrl+C", Role = MenuRole.copy },
+                    new API.Entities.MenuItem { Label = "Paste", Accelerator = "CmdOrCtrl+V", Role = MenuRole.paste },
+                    new API.Entities.MenuItem { Label = "Select All", Accelerator = "CmdOrCtrl+A", Role = MenuRole.selectall }
                 }
                 },
-                new MenuItem { Label = "View", Submenu = new MenuItem[] {
-                    new MenuItem
+                new API.Entities.MenuItem { Label = "View", Submenu = new API.Entities.MenuItem[] {
+                    new API.Entities.MenuItem
                     {
                         Label = "Reload",
                         Accelerator = "CmdOrCtrl+R",
@@ -46,7 +46,7 @@ namespace ElectronNET.WebApp.Controllers
                             });
                         }
                     },
-                    new MenuItem
+                    new API.Entities.MenuItem
                     {
                         Label = "Toggle Full Screen",
                         Accelerator = "CmdOrCtrl+F",
@@ -56,17 +56,17 @@ namespace ElectronNET.WebApp.Controllers
                             Electron.WindowManager.BrowserWindows.First().SetFullScreen(!isFullScreen);
                         }
                     },
-                    new MenuItem
+                    new API.Entities.MenuItem
                     {
                         Label = "Open Developer Tools",
                         Accelerator = "CmdOrCtrl+I",
                         Click = () => Electron.WindowManager.BrowserWindows.First().WebContents.OpenDevTools()
                     },
-                    new MenuItem
+                    new API.Entities.MenuItem
                     {
                         Type = MenuType.separator
                     },
-                    new MenuItem
+                    new API.Entities.MenuItem
                     {
                         Label = "App Menu Demo",
                         Click = async () => {
@@ -78,13 +78,13 @@ namespace ElectronNET.WebApp.Controllers
                     }
                 }
                 },
-                new MenuItem { Label = "Window", Role = MenuRole.window, Submenu = new MenuItem[] {
-                     new MenuItem { Label = "Minimize", Accelerator = "CmdOrCtrl+M", Role = MenuRole.minimize },
-                     new MenuItem { Label = "Close", Accelerator = "CmdOrCtrl+W", Role = MenuRole.close }
+                new API.Entities.MenuItem { Label = "Window", Role = MenuRole.window, Submenu = new API.Entities.MenuItem[] {
+                     new API.Entities.MenuItem { Label = "Minimize", Accelerator = "CmdOrCtrl+M", Role = MenuRole.minimize },
+                     new API.Entities.MenuItem { Label = "Close", Accelerator = "CmdOrCtrl+W", Role = MenuRole.close }
                 }
                 },
-                new MenuItem { Label = "Help", Role = MenuRole.help, Submenu = new MenuItem[] {
-                    new MenuItem
+                new API.Entities.MenuItem { Label = "Help", Role = MenuRole.help, Submenu = new API.Entities.MenuItem[] {
+                    new API.Entities.MenuItem
                     {
                         Label = "Learn More",
                         Click = async () => await Electron.Shell.OpenExternalAsync("https://github.com/ElectronNET")
@@ -102,15 +102,15 @@ namespace ElectronNET.WebApp.Controllers
 
         private void CreateContextMenu()
         {
-            var menu = new MenuItem[]
+            var menu = new API.Entities.MenuItem[]
             {
-                new MenuItem
+                new API.Entities.MenuItem
                 {
                     Label = "Hello",
                     Click = async () => await Electron.Dialog.ShowMessageBoxAsync("Electron.NET rocks!")
                 },
-                new MenuItem { Type = MenuType.separator },
-                new MenuItem { Label = "Electron.NET", Type = MenuType.checkbox, Checked = true }
+                new API.Entities.MenuItem { Type = MenuType.separator },
+                new API.Entities.MenuItem { Label = "Electron.NET", Type = MenuType.checkbox, Checked = true }
             };
 
             var mainWindow = Electron.WindowManager.BrowserWindows.FirstOrDefault();
