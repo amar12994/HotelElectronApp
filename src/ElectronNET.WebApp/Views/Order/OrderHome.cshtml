@@ -1,0 +1,66 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+Hello World
+@*
+<button id="button1" type="button">Click Me!</button>
+
+
+<button id="button2" type="button">Click again!</button>*@
+
+<ul class="submenu">
+    <li class="submenuItem"><a class="active" href="#home">Home</a></li>
+    <li class="submenuItem"><a href="#news">News</a></li>
+    <li class="submenuItem"><a href="#contact">Contact</a></li>
+    <li class="submenuItem"><a href="#about">About</a></li>
+</ul>
+
+  <link rel="stylesheet" href="~/css/order.css" asp-append-version="true" />
+
+<script>
+    (function() {
+        const { ipcRenderer } = require("electron");
+
+        //$("button1").click(function() {
+        //    ipcRenderer.send("button1");
+        //});
+        document.getElementById("button1").addEventListener("click", () => {
+            ipcRenderer.send("button1", "hello");
+        });
+
+        //document.getElementById("manage-window").addEventListener("click", () => {
+        //    ipcRenderer.send("manage-window");
+        //});
+
+        ipcRenderer.on("button1-success", (sender, data) => {
+            console.log(data);
+        });
+
+        //document.getElementById("listen-to-window").addEventListener("click", () => {
+        //    ipcRenderer.send("listen-to-window");
+        //});
+
+        //document.getElementById('focus-on-modal-window').addEventListener("click", () => {
+        //    ipcRenderer.send("listen-to-window-set-focus");
+        //});
+
+        //ipcRenderer.on("listen-to-window-focus", (sender, data) => {
+        //    const focusModalBtn = document.getElementById('focus-on-modal-window');
+        //    focusModalBtn.classList.add('disappear');
+        //    focusModalBtn.classList.remove('smooth-appear');
+        //});
+
+        //ipcRenderer.on("listen-to-window-blur", (sender, data) => {
+        //    const focusModalBtn = document.getElementById('focus-on-modal-window');
+        //    focusModalBtn.classList.add('smooth-appear');
+        //    focusModalBtn.classList.remove('disappear');
+        //});
+
+        //document.getElementById('frameless-window').addEventListener("click", () => {
+        //    ipcRenderer.send("frameless-window");
+        //});
+    }());
+</script>s
