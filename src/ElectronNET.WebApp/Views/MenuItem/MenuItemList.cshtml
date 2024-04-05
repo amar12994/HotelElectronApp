@@ -1,5 +1,552 @@
 ﻿@{
     Layout = "~/Pages/_Layout.cshtml";
+    var data = ElectronD.Instance.Cetegories;
 }
+@using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
 
-<h1>Menu Item List</h1>
+
+<div>
+    <div>
+        <ul id="menu">
+            <li><a id="menuDashBoard" class="active" href='javascript:;' onclick="OnClickDashBoard()">DashBoard</a></li>
+            <li><a id="menuCategory" href='javascript:;' onclick="OnClickCategoryMenu()">Category</a></li>
+            <li><a id="menuItem" href='javascript:;' onclick="OnClickMenuItem();">Menu Item</a></li>
+            <li><a id="menuAddon" href='javascript:;' onclick="OnClickAddonItem();">Addon</a></li>
+        </ul>
+    </div>
+    <br />
+
+    <div id="divDashBoard">
+        <div class="grid-container">
+            @if (data != null)
+            {
+                @foreach (var category in data)
+                {
+                    @if (category.MenuItems != null)
+                    {
+                        @foreach (var menuItem in category.MenuItems)
+                        {
+                            <div>
+                                <div class="card">
+                                    <h1>@menuItem.Name</h1>
+                                    <p class="price">$@menuItem.Price</p>
+                                    <p>@menuItem.Description</p>
+                                    @*<p style="font-size: 20px;">Quantity: <input type="number" id="quantity+@menuItem.Id" min="1" class="number" style=" width:50px;font-size: 14px;height: 21px;" /></p>*@
+
+                                    <div id="divkartadd_@menuItem.Id">
+                                        @*<p><button class="cartbutton" id="addCart" itemid=@menuItem.Id categoryId=@category.Id itemname=@menuItem.Name itemprice=@menuItem.Price>Add to Cart</button></p>*@
+                                        <p>
+                                            <button class="cartbutton" id="addCart+@menuItem.Id" onclick="OnClickAddKart('@menuItem.Id','@category.Id','@menuItem.Name','@menuItem.Price')">Add to Cart</button>
+                                        </p>
+                                    </div>
+
+                                    <div id="divincdec_@menuItem.Id" hidden>
+                                        <button type='button' id='addCart_@menuItem.Id' onclick="OnClickMinus('@menuItem.Id','@category.Id','@menuItem.Name','@menuItem.Price')">-</button>
+                                        <input type='number' id='kartItemNumber_@menuItem.Id' disabled class="selectedkartnumber" value='1'>
+                                        <button type='button' id='removeCart_@menuItem.Id' onclick="OnClickAdd('@menuItem.Id','@category.Id','@menuItem.Name','@menuItem.Price')">+</button>&nbsp;
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        }
+                    }
+
+                }
+            }
+        </div>
+    </div>
+
+    <div id="divcategory" hidden>
+        <div id="divcategoryList">
+            <div>
+                <button id="btncategory" style="text-decoration: none; display: inline-block; cursor: pointer;float: right;" onclick="onClickCategoryAddNew()"> Add </button>
+            </div>
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblCategory" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in data)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.Name</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="divnewcategory" hidden>
+            <label for="cname">Category Name:</label>
+            <input type="text" id="cname"><br><br>
+            <input id="btnCategorySubmit" type="submit" value="Submit">
+            <input type="button" value="Cancel" onclick="onClickNewCategoryCancel()">
+        </div>
+    </div>
+
+    <div id="divmenuitem" hidden>
+        <div id="divmenuitemlist">
+            <div>
+                <button id="btnmenuitem" style="text-decoration: none; display: inline-block; cursor: pointer;float: right;" onclick="onClickMenuItemAddNew()"> Add </button>
+            </div>
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblMenuItem" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Category Id</th>
+                            <th>Menu Item</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in data)
+                        {
+                            @if (category.MenuItems != null)
+                            {
+                                @foreach (var menuItem in category.MenuItems)
+                                {
+                                    <tr>
+                                        <td>@menuItem.Id</td>
+                                        <td>@menuItem.CategoryId</td>
+                                        <td>@menuItem.Name</td>
+                                        <td>@menuItem.Price</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="divnewmenuitem" hidden>
+            <label for="ddcategory">Choose a Category:</label>
+            <select name="ddcategory" id="ddcategory">
+                @foreach (var item in data)
+                {
+                    <option value=@item.Id>@item.Name</option>
+                }
+            </select><br><br>
+            <label for="menuItemName">Menu Item Name:</label>
+            <input type="text" id="menuItemName"><br><br>
+            <label for="menuItemPrice">Price:</label>
+            <input type="text" id="menuItemPrice"><br><br>
+            <input id="btnMenuItemSubmit" type="button" value="Submit">
+            <input type="button" value="Cancel" onclick="onClickNewMenuItemCancel()">
+        </div>
+    </div>
+
+    <div id="divAddonItem" hidden>
+        <div id="divAddonItemlist">
+            <div>
+                <button id="btnAddonItem" style="text-decoration: none; display: inline-block; cursor: pointer;float: right;" onclick="onClickAddonItemAddNew()"> Add </button>
+            </div>
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblAddonItem" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Menu Item</th>
+                            <th>Category</th>
+                            <th>Addon Item</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in data)
+                        {
+                            @if (category.MenuItems != null)
+                            {
+                                @foreach (var menuItem in category.MenuItems)
+                                {
+                                    @if (menuItem.AddonItems != null)
+                                    {
+                                        @foreach (var item in menuItem.AddonItems)
+                                        {
+                                            <tr>
+                                                <td>@item.Id</td>
+                                                <td>@item.CategoryId</td>
+                                                <td>@item.MenuItemId</td>
+                                                <td>@item.Name</td>
+                                                <td>@item.Price</td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="divNewAddonItem" hidden>
+            <label for="ddAddonCategory">Choose a Category:</label>
+            <select name="ddAddonCategory" id="ddAddonCategory">
+                @foreach (var item in data)
+                {
+                    <option value=@item.Id>@item.Name</option>
+                }
+            </select><br><br>
+            <label for="ddAddonItem">Choose Item Menu:</label>
+            <select name="ddAddonItem" id="ddAddonItem">
+                <option value="">Select</option>
+            </select><br><br>
+            <label for="addonItemName">Addon Name:</label>
+            <input type="text" id="addonItemName"><br><br>
+            <label for="addonItemPrice">Price:</label>
+            <input type="text" id="addonItemPrice"><br><br>
+            <input id="btnNewAddonItemSubmit" type="button" value="Submit">
+            <input type="button" value="Cancel" onclick="onClickNewAddonItemCancel()">
+        </div>
+    </div>
+
+</div>
+@*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css" />
+<script src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js" />*@
+
+<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css" />
+<script type="text/javascript" src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    (
+        function() {
+            const { ipcRenderer } = require("electron");
+            window.addEventListener('load', function() {
+                ipcRenderer.send('category-list');
+
+            }, false);
+
+            ipcRenderer.on('category-list-success', (event, arg) => {
+                $('#tblCategory').dataTable();
+                $('#tblMenuItem').dataTable();
+                $('#tblAddonItem').dataTable();
+            });
+
+            document.getElementById("btnCategorySubmit").addEventListener("click", () => {
+                let cname = $('#cname').val();
+                ipcRenderer.send('new-category', cname);
+            });
+
+            ipcRenderer.on('new-category-success', (event, arg) => {
+                alert("Record Added");
+                var obj = JSON.parse(arg);
+                let row = "<tr><td>" + obj.Id + "</td><td>" + obj.Name + "</td></tr>";
+
+                $("#tblCategory tbody").append(row);
+                onClickNewCategoryCancel();
+            });
+
+            document.getElementById("btnMenuItemSubmit").addEventListener("click", () => {
+
+                let menuItem = {
+                    CategoryId: $('#ddcategory').val(),
+                    Name: $('#menuItemName').val(),
+                    Price: $('#menuItemPrice').val()
+                };
+                ipcRenderer.send('new-menu-item', JSON.stringify(menuItem));
+            });
+
+            ipcRenderer.on('new-menu-item-success', (event, arg) => {
+                alert("Record Added");
+                var obj = JSON.parse(arg);
+                let row = "<tr><td>" + obj.Id + "</td><td>" + obj.CategoryId + "</td><td>" + obj.Name + "</td><td>" + obj.Price + "</td></tr>";
+
+                $("#tblMenuItem tbody").append(row);
+                onClickNewCategoryCancel();
+            });
+
+            document.getElementById("ddAddonCategory").addEventListener("change", (e) => {
+                let categoryGuidId = $('#ddAddonCategory').val();
+                ipcRenderer.send('get-menu-basedon-category', categoryGuidId);
+            });
+            ipcRenderer.on('get-menu-basedon-category-success', (event, arg) => {
+                var menuItems = JSON.parse(arg);
+                $('#ddAddonItem').empty()
+
+                for (var j = 0; j < menuItems.length; j++) {
+                    $("#ddAddonItem").append("<option value=" + menuItems[j].Id + ">" + menuItems[j].Name + "</option>");
+                };
+            });
+
+            document.getElementById("btnNewAddonItemSubmit").addEventListener("click", () => {
+
+                let addonItem = {
+                    CategoryId: $('#ddAddonCategory').val(),
+                    MenuItemId: $('#ddAddonItem').val(),
+                    Name: $('#addonItemName').val(),
+                    Price: $('#addonItemPrice').val()
+                };
+                ipcRenderer.send('new-addon-item', JSON.stringify(addonItem));
+            });
+
+            ipcRenderer.on('new-addon-item-success', (event, arg) => {
+                alert("Record Added");
+                var addonItem = JSON.parse(arg);
+                let row = "<tr><td>" + addonItem.Id + "</td><td>" + addonItem.CategoryId + "</td><td>" + addonItem.MenuItemId + "</td><td>" + addonItem.Name + "</td><td>" + addonItem.Price + "</td></tr>";
+
+                $("#tblAddonItem tbody").append(row);
+                onClickNewAddonItemCancel();
+            });
+
+            //document.getElementById("addCart").addEventListener("click", (e) => {
+            //    e.preventDefault();
+            //    let cartObj = {
+            //        Id: e.target.attributes.itemid.value,
+            //        CategoryId: e.target.attributes.categoryId.value,
+            //        Name: e.target.attributes.itemname.value,
+            //        Price: e.target.attributes.itemprice.value,
+            //        Quantity: $('#quantity' + e.target.attributes.itemid.value).val()
+            //    };
+
+            //    ipcRenderer.send('add-cart', JSON.stringify(cartObj));
+            //});
+
+            //ipcRenderer.on('add-cart-success', (event, arg) => {
+            //    alert("Record Added");
+            //    //$('#'arg).append
+            //});
+        }());
+    var KartDataList = [];
+    function onClickCategoryAddNew() {
+        $('#cname').val('');
+        $('#divcategoryList').hide();
+        $('#divnewcategory').show();
+    }
+    function onClickNewCategoryCancel() {
+        $('#divcategoryList').show();
+        $('#divnewcategory').hide();
+    }
+    function onClickCategorySubmit() {
+        let cname = $('#cname').val();
+        ipcRenderer.send('new-category', cname);
+    }
+
+    function OnClickMenuItem() {
+        $('#divDashBoard').hide();
+        $('#divcategory').hide();
+        $('#divAddonItem').hide();
+        $('#divmenuitem').show();
+        ActiveMenu('menuItem');
+    }
+    function onClickMenuItemAddNew() {
+        $('#divmenuitemlist').hide();
+        $('#divnewmenuitem').show();
+    }
+    function onClickNewMenuItemCancel() {
+
+        $('#divnewmenuitem').hide();
+        $('#divmenuitemlist').show();
+    }
+
+    function OnClickAddonItem() {
+        $('#divDashBoard').hide();
+        $('#divcategory').hide();
+        $('#divmenuitem').hide();
+        $('#divAddonItem').show();
+        ActiveMenu('menuAddon');
+    }
+
+    function onClickAddonItemAddNew() {
+        $('#ddAddonItem').val('');
+        $('#addonItemName').val('');
+        $('#addonItemPrice').val('');
+
+        $('#divAddonItemlist').hide();
+        $('#divNewAddonItem').show();
+    }
+
+    function onClickNewAddonItemCancel() {
+        $('#divNewAddonItem').hide();
+        $('#divAddonItemlist').show();
+    }
+
+    function OnClickCategoryMenu() {
+        $('#divcategory').show();
+        $('#divDashBoard').hide();
+        $('#divmenuitem').hide();
+        $('#divAddonItem').hide();
+        ActiveMenu('menuCategory');
+    }
+
+    function OnClickDashBoard() {
+        $('#divDashBoard').show();
+        $('#divcategory').hide();
+        $('#divmenuitem').hide();
+        $('#divAddonItem').hide();
+        ActiveMenu('menuDashBoard');
+    }
+
+    function ActiveMenu(element) {
+        $('#menu li a.active').toggleClass('active');
+        $('#' + element).addClass('active');
+    }
+    function OnClickAddKart(menuItemId, categoryId, menuItemName, menuItemPrice) {
+        $('#divkartadd_' + menuItemId).hide();
+        $('#divincdec_' + menuItemId).show();
+        let cartObj = {
+            Id: menuItemId,
+            CategoryId: categoryId,
+            Name: menuItemName,
+            Price: menuItemPrice,
+            Quantity: parseInt($('#kartItemNumber_' + menuItemId).val())
+        };
+        AddOrUpdateKartList(cartObj);
+    }
+    function OnClickMinus(menuItemId, categoryId, menuItemName, menuItemPrice) {
+        let kartvalue = parseInt($('#kartItemNumber_' + menuItemId).val());
+
+        if (kartvalue <= 1) {
+            $('#divkartadd_' + menuItemId).show();
+            $('#divincdec_' + menuItemId).hide();
+            let needToRemove = KartDataList.find(x => x.Id == menuItemId);
+            KartDataList.splice($.inArray(needToRemove, KartDataList), 1);
+        }
+        else {
+            $('#kartItemNumber_' + menuItemId).val(kartvalue - 1);
+            let cartObj = {
+                Id: menuItemId,
+                CategoryId: categoryId,
+                Name: menuItemName,
+                Price: menuItemPrice,
+                Quantity: parseInt($('#kartItemNumber_' + menuItemId).val())
+            };
+            AddOrUpdateKartList(cartObj);
+        }
+    }
+    function OnClickAdd(menuItemId, categoryId, menuItemName, menuItemPrice) {
+        let kartvalue = parseInt($('#kartItemNumber_' + menuItemId).val());
+        $('#kartItemNumber_' + menuItemId).val(kartvalue + 1);
+        let cartObj = {
+            Id: menuItemId,
+            CategoryId: categoryId,
+            Name: menuItemName,
+            Price: menuItemPrice,
+            Quantity: parseInt($('#kartItemNumber_' + menuItemId).val())
+        };
+        AddOrUpdateKartList(cartObj);
+    }
+    function AddOrUpdateKartList(cartObj) {
+
+        let isExist = KartDataList.findIndex(x => x.Id === cartObj.Id);
+        if (isExist >= 0) {
+            for (var j = 0; j < KartDataList.length; j++) {
+                if (KartDataList[j].Id == cartObj.Id) {
+                    KartDataList[j].Quantity = cartObj.Quantity;
+                }
+            };
+        } else {
+            KartDataList.push(cartObj);
+        }
+    }
+</script>
+
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-template-rows: 150px 80px;
+        gap: 10px;
+        /*background-color: #2196F3;*/
+        padding: 10px;
+    }
+
+        .grid-container > div {
+            /*background-color: rgba(255, 255, 255, 0.8);*/
+            text-align: center;
+            padding: 20px 0;
+            font-size: 30px;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        margin: auto;
+        text-align: center;
+        font-family: arial;
+    }
+
+    .price {
+        color: grey;
+        font-size: 22px;
+    }
+
+    .cartbutton {
+        border: none;
+        outline: 0;
+        padding: 5px;
+        color: white;
+        background-color: #04AA6D;
+        text-align: center;
+        cursor: pointer;
+        font-size: 18px;
+        height:30px;
+    }
+
+        .card button:hover {
+            opacity: 0.7;
+        }
+
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #333;
+    }
+
+    li {
+        float: left;
+    }
+
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+            li a:hover:not(.active) {
+                background-color: #111;
+            }
+
+    .active {
+        background-color: #04AA6D;
+    }
+    .incrementdecrentbutton
+    {
+        height: 20px;
+        padding: 4px;
+    }
+    .selectedkartnumber{
+        width: 40px;
+        height: 20px;
+        font-size: 15px;
+    }
+
+
+</style>

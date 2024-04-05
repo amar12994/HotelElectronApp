@@ -1,5 +1,138 @@
 ﻿@{
     Layout = "~/Pages/_Layout.cshtml";
+    var orders = ElectronD.Instance.CustomerOrders;
 }
+@using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
 
-<h1>Order List</h1>
+<div>
+    <div>
+        <ul id="menu">
+            <li><a id="menuOrder" class="active" href='javascript:;' onclick="OnClickOrderMenu()">Order</a></li>
+            <li><a id="menuConfirmOrder" href='javascript:;' onclick="OnClickConfirmOrderMenu();">Confirm Order</a></li>
+            <li><a id="menuCompleteOrder" href='javascript:;' onclick="OnClickCompleteOrderMenu();">Complete Order</a></li>
+        </ul>
+    </div>
+    <br />
+
+    <div id="divOrder">
+        <div id="divOrderList">
+            <div>
+                <button id="btnNewOrder" style="text-decoration: none; display: inline-block; cursor: pointer;float: right;" onclick="onClickNewOrder()"> Add </button>
+            </div>
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblOrder" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer Name</th>
+                            <th>Customer Phone</th>
+                            <th>Customer Address</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders != null)
+                        {
+                            @foreach (var order in orders)
+                            {
+                                <tr>
+                                    <td>@order.OrderId</td>
+                                    <td>@order.Name</td>
+                                    <td>@order.Phone</td>
+                                    <td>@order.Address</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="divNewOrder" hidden>
+            <label for="cname">Name:</label>
+            <input type="text" id="cname"><br><br>
+            <label for="cphone">PhoneNumber:</label>
+            <input type="text" id="cphone"><br><br>
+            <label for="caddress">Address:</label>
+            <input type="text" id="caddress"><br><br>
+            <label for="cemail">Email:</label>
+            <input type="text" id="cemail"><br><br>
+            <input id="btnNewOrderSubmit" type="submit" value="Submit">
+            <input type="button" value="Cancel" onclick="onClickNewCategoryCancel()">
+        </div>
+    </div>
+
+</div>
+
+<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css" />
+<script type="text/javascript" src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    (function() {
+        const { ipcRenderer } = require("electron");
+        window.addEventListener('load', function() {
+            $('#tblOrder').dataTable();
+
+        }, false);
+
+    }());
+
+    function OnClickOrderMenu() {
+        $('#divOrder').show();
+        //$('#divmenuitem').hide();
+        //$('#divAddonItem').hide();
+        ActiveMenu('menuOrder');
+    }
+    function OnClickConfirmOrderMenu() {
+        //$('#divcategory').hide();
+        //$('#divAddonItem').hide();
+        //$('#divmenuitem').show();
+        ActiveMenu('menuConfirmOrder');
+    }
+    function OnClickCompleteOrderMenu() {
+        //$('#divcategory').hide();
+        //$('#divmenuitem').hide();
+        //$('#divAddonItem').show();
+        ActiveMenu('menuCompleteOrder');
+    }
+    function ActiveMenu(element) {
+        $('#menu li a.active').toggleClass('active');
+        $('#' + element).addClass('active');
+    }
+
+</script>
+
+<style>
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #333;
+    }
+
+    li {
+        float: left;
+    }
+
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+            li a:hover:not(.active) {
+                background-color: #111;
+            }
+
+    .active {
+        background-color: #04AA6D;
+    }
+</style>
