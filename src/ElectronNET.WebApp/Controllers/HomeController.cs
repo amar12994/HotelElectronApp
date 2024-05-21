@@ -1,16 +1,11 @@
-﻿using ElectronNET.WebApp.Domain;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace ElectronNET.WebApp.Controllers
 {
     public class HomeController : Controller
     {
-       
-
         public IActionResult Index()
         {
-            
             return View();
         }
     }

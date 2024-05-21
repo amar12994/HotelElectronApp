@@ -1,24 +1,152 @@
 ﻿@{
+    @using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
+    @using JsonConvert=Newtonsoft.Json.JsonConvert;
+
     Layout = "~/Pages/_Layout.cshtml";
     var orders = ElectronD.Instance.CustomerOrders;
+    var cartMenuItems = ElectronD.Instance.CartMenuItems;
+    var serializeCetegoryItmes = await Task.FromResult(JsonConvert.SerializeObject(ElectronD.Instance.Cetegories));
+    var serializeMenuItems = await Task.FromResult(JsonConvert.SerializeObject(ElectronD.Instance.CartMenuItems));
+    float price = 0;
+    var imageBasePath = ElectronD.Instance.ImageBasePath;
 }
-@using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
+
 
 <div>
     <div>
         <ul id="menu">
-            <li><a id="menuOrder" class="active" href='javascript:;' onclick="OnClickOrderMenu()">Order</a></li>
+            <li><a id="menuNewOrder" class="active" href='javascript:;' onclick="OnClickNewOrderMenu()">NewOrder</a></li>
+            <li><a id="menuOrder" href='javascript:;' onclick="OnClickOrderMenu()">Order</a></li>
             <li><a id="menuConfirmOrder" href='javascript:;' onclick="OnClickConfirmOrderMenu();">Confirm Order</a></li>
             <li><a id="menuCompleteOrder" href='javascript:;' onclick="OnClickCompleteOrderMenu();">Complete Order</a></li>
         </ul>
     </div>
     <br />
 
-    <div id="divOrder">
-        <div id="divOrderList">
+    <div id="divNewOrder">
+        <input id="cartitems" type="hidden" value='@serializeMenuItems' />
+        <input id="cetegoryItems" type="hidden" value='@serializeCetegoryItmes' />
+        <input id="imageBasePath" type="hidden" value="@imageBasePath" />
+        <div>
             <div>
-                <button id="btnNewOrder" style="text-decoration: none; display: inline-block; cursor: pointer;float: right;" onclick="onClickNewOrder()"> Add </button>
+                <input id="txtSearch" class="itemsearch" type="text" name="search" onchange="AppendSearchMenuItems()" placeholder="Search..">
             </div>
+            <div id="searchResult" hidden>
+
+                <div id="searchMenuItems" class="grid-container">
+                </div>
+
+            </div>
+        </div>
+        <div class="container">
+            <div id="divNewOrderList" class="col-sm-7">
+                <br />
+                <br />
+                <div class="table-responsive">
+                    <table id="tblNewOrder" class="display table" width="100%" style="width:800px;">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (cartMenuItems != null && cartMenuItems.Count() > 0)
+                            {
+                                int i = 1;
+                                @foreach (var carkMenuItem in cartMenuItems)
+                                {
+                                    <tr id="tr_@carkMenuItem.Id">
+                                        <td>@i</td>
+                                        <td>@carkMenuItem.Name</td>
+                                        <td>@carkMenuItem.Price</td>
+                                        <td>
+                                            <button type='button' id='addCart_@carkMenuItem.Id' onclick="OnClickMinus('@carkMenuItem.Id','@carkMenuItem.CategoryId','@carkMenuItem.Name','@carkMenuItem.Price')">-</button>
+                                            <input type='number' id='kartItemNumber_@carkMenuItem.Id' disabled class="selectedkartnumber" value='@carkMenuItem.Quantity' style="text-align: center;width: 40px;">
+                                            <button type='button' id='removeCart_@carkMenuItem.Id' onclick="OnClickAdd('@carkMenuItem.Id','@carkMenuItem.CategoryId','@carkMenuItem.Name','@carkMenuItem.Price')">+</button>&nbsp;
+                                        </td>
+                                    </tr>
+                                    i = i + 1;
+                                    price = price + (@carkMenuItem.Price * @carkMenuItem.Quantity);
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-sm-5">
+                <br />
+                <br />
+                <div class="grid-container">
+                    <div class="card">
+                        <div>
+                            <div class="col-sm-9" style="text-align: left;">Price:</div>
+                            <div id="price" class="col-sm-3" style="text-align: right;"> @price</div>
+                        </div>
+                        <div>
+                            <div class="col-sm-9" style="text-align: left;">Discount:</div>
+                            <div class="col-sm-3" style="text-align: right;"> 00</div>
+                        </div>
+                        <div>
+                            <div class="col-sm-9" style="text-align: left;">Delivery Charge:</div>
+                            <div class="col-sm-3" style="text-align: right;"> 00</div>
+                        </div>
+                        <br />
+                        <div>
+                            <div class="col-sm-9" style="text-align: left;">Total Amount:</div>
+                            <div id="totalPrice" class="col-sm-3" style="text-align: right;"> @price</div>
+                        </div>
+                        <br />
+                        <br />
+                        <div>
+                            <div class="col-sm-12">
+                                <button class="btn" id="btnAdd" onclick="onClickSaveOrderPopUp()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" onclick="onClickClosePopUp()">&times;</button>
+                    <h4 class="modal-title">Modal Header</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="cname">Name:</label><br>
+                        <input type="text" id="cname"><br><br>
+                        <label for="caddress">Address:</label><br>
+                        <input type="text" id="caddress"><br><br>
+                        <label for="cphone">PhoneNumber:</label><br>
+                        <input type="tel" id="cphone" placeholder="888 888 8888" pattern="[0-9]{3} [0-9]{3} [0-9]{4}" maxlength="12"><br><br>
+                        <label for="cemail">Email:</label><br>
+                        <input type="text" id="cemail"><br><br><br>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnConfirmOrder" type="button" class="btn btn-success">Confirm</button>
+                    <button id="btnpay" type="button" class="btn btn-secondary">Pay</button>
+                    <button type="button" class="btn btn-danger" onclick="onClickClosePopUp()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="divOrder" hidden>
+        <div id="divOrderList">
             <br />
             <br />
             <div class="table-responsive">
@@ -27,8 +155,9 @@
                         <tr>
                             <th>Order Id</th>
                             <th>Customer Name</th>
-                            <th>Customer Phone</th>
+                            <th>Contact</th>
                             <th>Customer Address</th>
+                            <th>Status</th>
 
                         </tr>
                     </thead>
@@ -42,6 +171,18 @@
                                     <td>@order.Name</td>
                                     <td>@order.Phone</td>
                                     <td>@order.Address</td>
+                                    @if (order.IsConfirmed && order.IsPayment)
+                                    {
+                                        <td>
+                                            Completed
+                                        </td>
+                                    }
+                                    else if (order.IsConfirmed)
+                                    {
+                                        <td>
+                                            Confirmed
+                                        </td>
+                                    }
                                 </tr>
                             }
                         }
@@ -49,61 +190,407 @@
                 </table>
             </div>
         </div>
+    </div>
 
-        <div id="divNewOrder" hidden>
-            <label for="cname">Name:</label>
-            <input type="text" id="cname"><br><br>
-            <label for="cphone">PhoneNumber:</label>
-            <input type="text" id="cphone"><br><br>
-            <label for="caddress">Address:</label>
-            <input type="text" id="caddress"><br><br>
-            <label for="cemail">Email:</label>
-            <input type="text" id="cemail"><br><br>
-            <input id="btnNewOrderSubmit" type="submit" value="Submit">
-            <input type="button" value="Cancel" onclick="onClickNewCategoryCancel()">
+    <div id="divConfirmOrder" hidden>
+        <div id="divConfirmOrderList">
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblConfirmOrder" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer Name</th>
+                            <th>Contact</th>
+                            <th>Customer Address</th>
+                            <th>Action</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders != null)
+                        {
+                            var confirmOrder = orders.Where(ord => ord.IsConfirmed && !ord.IsPayment);
+                            @if (confirmOrder != null && confirmOrder.Count() > 0)
+                            {
+                                @foreach (var order in confirmOrder)
+                                {
+                                    <tr id="tr_@order.OrderId">
+                                        <td>@order.OrderId</td>
+                                        <td>@order.Name</td>
+                                        <td>@order.Phone</td>
+                                        <td>@order.Address</td>
+                                        <td>
+                                            <button title="Pay" onclick="onClickCompleteOrder('@order.OrderId')">
+                                                <i class="fa-brands fa-amazon-pay"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="divCompleteOrder" hidden>
+        <div id="divCompleteOrderList">
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblCompleteOrder" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer Name</th>
+                            <th>Contact</th>
+                            <th>Customer Address</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders != null)
+                        {
+                            var completeOrder = orders.Where(ord => ord.IsConfirmed && ord.IsPayment);
+                            @if (completeOrder != null && completeOrder.Count() > 0)
+                            {
+                                @foreach (var order in completeOrder)
+                                {
+                                    <tr>
+                                        <td>@order.OrderId</td>
+                                        <td>@order.Name</td>
+                                        <td>@order.Phone</td>
+                                        <td>@order.Address</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
 </div>
 
-<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<link rel="stylesheet" href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css" />
-<script type="text/javascript" src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
 <script type="text/javascript">
+    var KartDataList = [];
+    var CustomerOrder = {};
+    const { ipcRenderer } = require("electron");
     (function() {
-        const { ipcRenderer } = require("electron");
         window.addEventListener('load', function() {
-            $('#tblOrder').dataTable();
+            KartDataList = JSON.parse($('#cartitems').val());
+            if (KartDataList == null) {
+                KartDataList = [];
+            }
+            $('#tblOrder').dataTable({
+                "bAutoWidth": false,
+                "aoColumns": [
+                    { "sWidth": "25%" },
+                    { "sWidth": "null" },
+                    { "sWidth": "10%" },
+                    { "sWidth": "null" },
+                    { "sWidth": "10%" }
+                ]
+            });
+            $('#tblConfirmOrder').dataTable({
+                "bAutoWidth": false,
+                "aoColumns": [
+                    { "sWidth": "25%" },
+                    { "sWidth": "null" },
+                    { "sWidth": "10%" },
+                    { "sWidth": "null" },
+                    { "sWidth": "5%" }
+                ]
+            });
+            $('#tblCompleteOrder').dataTable({
+                "bAutoWidth": false,
+                "aoColumns": [
+                    { "sWidth": "25%" },
+                    { "sWidth": "null" },
+                    { "sWidth": "10%" },
+                    { "sWidth": "null" }
+                ]
+            });
+
 
         }, false);
 
+        document.getElementById("btnConfirmOrder").addEventListener("click", () => {
+            CustomerOrder = PrepareCustomerObject();
+            ipcRenderer.send('confirm-order', JSON.stringify(CustomerOrder));
+        });
+
+        document.getElementById("btnpay").addEventListener("click", () => {
+            CustomerOrder = PrepareCustomerObject();
+            CustomerOrder.IsPayment = true;
+            ipcRenderer.send('confirm-order', JSON.stringify(CustomerOrder));
+        });
+
+        ipcRenderer.on('confirm-order-success', (event, arg) => {
+            ClearAllField();
+            $('#myModal').removeClass('in')
+            $('#myModal').hide();
+            FillDataInTable(arg);
+            KartDataList = [];
+            RefreshTableNewOrder();
+            OnClickOrderMenu();
+        });
+
+        ipcRenderer.on('complete-order-success', (event, arg) => {
+            alert('Order:-"' + arg + '\n" Paid');
+            $('#tr_' + arg).hide();
+        });
+
     }());
 
+    function OnClickNewOrderMenu() {
+        $('#divOrder').hide();
+        $('#divCompleteOrder').hide();
+        $('#divConfirmOrder').hide();
+        $('#divNewOrder').show();
+        ActiveMenu('menuNewOrder');
+    }
     function OnClickOrderMenu() {
+        $('#divNewOrder').hide();
+        $('#divCompleteOrder').hide();
+        $('#divConfirmOrder').hide();
         $('#divOrder').show();
-        //$('#divmenuitem').hide();
-        //$('#divAddonItem').hide();
         ActiveMenu('menuOrder');
     }
     function OnClickConfirmOrderMenu() {
-        //$('#divcategory').hide();
-        //$('#divAddonItem').hide();
-        //$('#divmenuitem').show();
+        $('#divOrder').hide();
+        $('#divNewOrder').hide();
+        $('#divCompleteOrder').hide();
+        $('#divConfirmOrder').show();
         ActiveMenu('menuConfirmOrder');
     }
     function OnClickCompleteOrderMenu() {
-        //$('#divcategory').hide();
-        //$('#divmenuitem').hide();
-        //$('#divAddonItem').show();
+        $('#divOrder').hide();
+        $('#divNewOrder').hide();
+        $('#divConfirmOrder').hide();
+        $('#divCompleteOrder').show();
         ActiveMenu('menuCompleteOrder');
     }
     function ActiveMenu(element) {
         $('#menu li a.active').toggleClass('active');
         $('#' + element).addClass('active');
     }
+
+    function OnClickMinus(menuItemId, categoryId, menuItemName, menuItemPrice) {
+        let kartvalue = parseInt($('#kartItemNumber_' + menuItemId).val());
+        if (kartvalue > 0) {
+            $('#kartItemNumber_' + menuItemId).val(kartvalue - 1);
+            let cartObj = {
+                Id: menuItemId,
+                CategoryId: categoryId,
+                Name: menuItemName,
+                Price: menuItemPrice,
+                Quantity: parseInt($('#kartItemNumber_' + menuItemId).val())
+            };
+            AddOrUpdateKartList(cartObj);
+        }
+
+    }
+    function OnClickAdd(menuItemId, categoryId, menuItemName, menuItemPrice) {
+        let kartvalue = parseInt($('#kartItemNumber_' + menuItemId).val());
+        $('#kartItemNumber_' + menuItemId).val(kartvalue + 1);
+        let cartObj = {
+            Id: menuItemId,
+            CategoryId: categoryId,
+            Name: menuItemName,
+            Price: menuItemPrice,
+            Quantity: parseInt($('#kartItemNumber_' + menuItemId).val())
+        };
+        AddOrUpdateKartList(cartObj);
+    }
+
+    function AddOrUpdateKartList(cartObj) {
+
+        if (KartDataList != null) {
+            let indexFound = KartDataList.findIndex(x => x.Id === cartObj.Id);
+            if (indexFound >= 0) {
+                for (var j = 0; j < KartDataList.length; j++) {
+                    if (KartDataList[j].Id == cartObj.Id) {
+                        if (cartObj.Quantity == 0) {
+                            KartDataList.splice(indexFound, 1);
+                            RefreshTableNewOrder();
+                            return;
+                        }
+                        KartDataList[j].Quantity = cartObj.Quantity;
+                    }
+                };
+            } else {
+                KartDataList.push(cartObj);
+            }
+        }
+        else {
+            KartDataList.push(cartObj);
+        }
+        CalculateTotalPrice();
+    }
+
+    function CalculateTotalPrice() {
+        let totalPrice = 0;
+        for (var j = 0; j < KartDataList.length; j++) {
+            totalPrice = totalPrice + (KartDataList[j].Quantity * KartDataList[j].Price);
+        };
+        $('#totalPrice').html(totalPrice);
+        $('#price').html(totalPrice);
+    }
+    function onClickSaveOrderPopUp() {
+        $('#myModal').addClass('in');
+        $('#myModal').show();
+    }
+    function onClickClosePopUp() {
+        $('#myModal').removeClass('in')
+        $('#myModal').hide();
+    }
+
+    function PrepareCustomerObject() {
+        return customerObj = {
+            Name: $('#cname').val(),
+            Address: $('#caddress').val(),
+            Phone: $('#cphone').val(),
+            Email: $('#cemail').val(),
+            IsConfirmed: true,
+            IsPayment: false,
+            OrderedItems: KartDataList
+        };
+    }
+
+    function FillDataInTable(orderId) {
+        let satus = '';
+        if (CustomerOrder.IsConfirmed && CustomerOrder.IsPayment) {
+            alert('Order:-"' + orderId + '\n"Confirmed and Paid');
+            RemoveNoDataAvailableInTableText('tblCompleteOrder');
+
+            let tableRow = "<tr><td>" + orderId + "</td><td>" + CustomerOrder.Name + "</td><td>" + CustomerOrder.Phone + "</td><td>" + CustomerOrder.Address + "</td></tr>";
+            $("#tblCompleteOrder tbody").append(tableRow);
+            satus = 'Completed';
+        }
+        else {
+            alert('Order:-"' + orderId + '\n"Confirmed');
+            RemoveNoDataAvailableInTableText('tblConfirmOrder');
+            let tableRow = "<tr><td>" + orderId + "</td><td>" + CustomerOrder.Name + "</td><td>" + CustomerOrder.Phone + "</td><td>" + CustomerOrder.Address + "</td><td>" + CustomerOrder.Address + "</td></tr>";
+            $("#tblConfirmOrder tbody").append(tableRow);
+            satus = 'Confirmed';
+        }
+        let tblOrderRow = "<tr><td>" + orderId + "</td><td>" + CustomerOrder.Name + "</td><td>" + CustomerOrder.Phone + "</td><td>" + CustomerOrder.Address + "</td><td>" + satus + "</td></tr>";
+
+        RemoveNoDataAvailableInTableText('tblOrder');
+        $("#tblOrder tbody").append(tblOrderRow);
+    }
+
+    function RemoveNoDataAvailableInTableText(tableName) {
+        if ($('#' + tableName + '>tbody >tr>td').html() == 'No data available in table') {
+            $('#' + tableName + '>tbody >tr>td').remove();
+        }
+    }
+
+    function AppendSearchMenuItems() {
+        let searchVal = $('#txtSearch').val();
+        $('#searchMenuItems').html('');
+        if (searchVal != '') {
+            let cetegoryItems = JSON.parse($('#cetegoryItems').val());
+            let searchItemshtml;
+            let imageBasePath = $('#imageBasePath').val();
+            if (cetegoryItems != null) {
+                for (var i = 0; i < cetegoryItems.length; i++) {
+                    if (cetegoryItems[i].MenuItems != null) {
+                        for (var j = 0; j < cetegoryItems[i].MenuItems.length; j++) {
+
+                            if (cetegoryItems[i].MenuItems[j].Name.toLowerCase().indexOf(searchVal.toLowerCase()) !== -1) {
+                                let html = '<div id="card_' + cetegoryItems[i].MenuItems[j].Id + '" class="card"><img class="image"'
+                                    + 'src="' + imageBasePath + '\\' + cetegoryItems[i].MenuItems[j].Picture + '" alt="Alps"><p><b>' + cetegoryItems[i].MenuItems[j].Name + '</b> </p><p> ₹' + cetegoryItems[i].MenuItems[j].Price + '</p>'
+                                    + '<button class="btn" id="btnAdd"'
+                                    + 'onclick="AddItem(\'' + cetegoryItems[i].MenuItems[j].Id + '\',\'' + cetegoryItems[i].MenuItems[j].CategoryId + '\',\'' + cetegoryItems[i].MenuItems[j].Name + '\',\'' + cetegoryItems[i].MenuItems[j].Price + '\')">Add</button> </div>';
+                                $('#searchMenuItems').append(html);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                $('#searchMenuItems').html('<div>Result not found</div>/');
+            }
+            $('#searchResult').show();
+        }
+        else {
+            $('#searchResult').hide();
+        }
+    }
+
+    function AddItem(menuItemId, categoryId, menuItemName, menuItemPrice) {
+        $('#card_' + menuItemId).hide();
+
+        if (KartDataList != null) {
+            let isExist = KartDataList.findIndex(x => x.Id === menuItemId);
+            if (isExist >= 0) {
+                let kartvalue = parseInt($('#kartItemNumber_' + menuItemId).val());
+                $('#kartItemNumber_' + menuItemId).val(kartvalue + 1);
+
+                for (var j = 0; j < KartDataList.length; j++) {
+                    if (KartDataList[j].Id == menuItemId) {
+                        KartDataList[j].Quantity = parseInt($('#kartItemNumber_' + menuItemId).val());
+                    }
+                };
+            } else {
+                let cartObj = {
+                    Id: menuItemId,
+                    CategoryId: categoryId,
+                    Name: menuItemName,
+                    Price: menuItemPrice,
+                    Quantity: 1
+                };
+                KartDataList.push(cartObj);
+                let row = '<tr id=tr_' + menuItemId + '><td>' + KartDataList.length + '</td><td>' + menuItemName + '</td><td>' + menuItemPrice + '</td><td>'
+                    + '<button type="button" id="addCart_' + menuItemId + '" onclick="OnClickMinus(\'' + menuItemId + '\',\'' + categoryId + '\',\'' + menuItemName + '\',\'' + menuItemPrice + '\')">-</button>'
+                    + '<input type="number" id="kartItemNumber_' + menuItemId + '" disabled class="selectedkartnumber" value="1" style="text-align: center;width: 40px;">'
+                    + '<button type="button" id="removeCart_' + menuItemId + '" onclick="OnClickAdd(\'' + menuItemId + '\',\'' + categoryId + '\',\'' + menuItemName + '\',\'' + menuItemPrice + '\')">+</button>'
+                    + '</td>'
+                    + '</tr>';
+                $("#tblNewOrder tbody").append(row);
+            }
+            CalculateTotalPrice();
+        }
+    }
+
+    function RefreshTableNewOrder() {
+        let count = 1;
+        let totalPrice = 0;
+        $("#tblNewOrder tbody tr").remove();
+        for (i = 0; i < KartDataList.length; i++) {
+            let row = '<tr id=tr_' + KartDataList[i].Id + '><td>' + count + '</td><td>' + KartDataList[i].Name + '</td><td>' + KartDataList[i].Price + '</td><td>'
+                + '<button type="button" id="addCart_' + KartDataList[i].Id + '" onclick="OnClickMinus(\'' + KartDataList[i].Id + '\',\'' + KartDataList[i].CategoryId + '\',\'' + KartDataList[i].Name + '\',\'' + KartDataList[i].Price + '\')">-</button>'
+                + '<input type="number" id="kartItemNumber_' + KartDataList[i].Id + '" disabled class="selectedkartnumber" value="1" style="text-align: center;width: 40px;">'
+                + '<button type="button" id="removeCart_' + KartDataList[i].Id + '" onclick="OnClickAdd(\'' + KartDataList[i].Id + '\',\'' + KartDataList[i].CategoryId + '\',\'' + KartDataList[i].Name + '\',\'' + KartDataList[i].Price + '\')">+</button>'
+                + '</td>'
+                + '</tr>';
+            $("#tblNewOrder tbody").append(row);
+            count = count + 1;
+            totalPrice = totalPrice + (KartDataList[i].Quantity * KartDataList[i].Price);
+        }
+        $('#totalPrice').html(totalPrice);
+        $('#price').html(totalPrice);
+    }
+
+    function ClearAllField() {
+        $('#cname').val('');
+        $('#caddress').val('');
+        $('#cphone').val('');
+        $('#cemail').val('');
+
+    }
+
+    function onClickCompleteOrder(orderId) {
+        ipcRenderer.send('complete-order', orderId);
+    }
+
+
 
 </script>
 
@@ -135,4 +622,68 @@
     .active {
         background-color: #04AA6D;
     }
+
+    .itemsearch {
+        width: 130px;
+        -webkit-transition: width 0.4s ease-in-out;
+        transition: width 0.4s ease-in-out;
+    }
+
+        /* When the input field gets focus, change its width to 100% */
+        .itemsearch:focus {
+            width: 100%;
+        }
+
+    .grid-container {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 1px;
+        width: 100%;
+        height: auto;
+    }
+
+        .grid-container > div {
+            text-align: center;
+            padding: 2px 0;
+            font-size: 20px;
+        }
+
+            .grid-container > div > p {
+                line-height: 5px;
+            }
+
+
+    .card {
+        box-shadow: 0 4px 2px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        width: 200px;
+        border-radius: 5px;
+        float: left;
+        flex: 0 0 250px;
+        margin-right: 6px;
+    }
+
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 1.5);
+        }
+
+    img {
+        border-radius: 5px 5px 0 0;
+    }
+
+    .btn {
+        background-color: #04AA6D;
+        color: white;
+    }
+
+        .btn:hover {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 1.5);
+        }
+
+    .image {
+        height: 80px;
+    }  
+
 </style>

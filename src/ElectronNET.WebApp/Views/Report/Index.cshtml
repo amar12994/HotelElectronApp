@@ -1,0 +1,310 @@
+﻿@{
+    @using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
+    @using JsonConvert=Newtonsoft.Json.JsonConvert;
+
+    Layout = "~/Pages/_Layout.cshtml";
+    var orders = ElectronD.Instance.CustomerOrders;
+}
+
+
+<div>
+    <div>
+        <ul id="menu">
+            <li><a id="menuDashBoard" class="active" href='javascript:;' onclick="OnClickDashBoardMenu()">Report DashBoard</a></li>
+            <li><a id="menuAllOrder" href='javascript:;' onclick="OnClickAllOrderMenu()">All Order</a></li>
+            <li><a id="menuConfirmedOrder" href='javascript:;' onclick="OnClickConfirmedOrderMenu();">Confirmed Order</a></li>
+            <li><a id="menuCompletedOrder" href='javascript:;' onclick="OnClickCompletedOrderMenu();">Completed Order</a></li>
+        </ul>
+    </div>
+    <br />
+
+    <div id="divDashBoard">
+        <div class="container" style="padding: 49px 36px;">
+            <div id="example-two">Loading...</div>
+        </div>
+    </div>
+
+    <div id="divAllOrder" hidden>
+        <div id="divAllOrderList">
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblAllOrder" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer Name</th>
+                            <th>Contact</th>
+                            <th>Customer Address</th>
+                            <th>Status</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders != null)
+                        {
+                            @foreach (var order in orders)
+                            {
+                                <tr>
+                                    <td>@order.OrderId</td>
+                                    <td>@order.Name</td>
+                                    <td>@order.Phone</td>
+                                    <td>@order.Address</td>
+                                    @if (order.IsConfirmed && order.IsPayment)
+                                    {
+                                        <td>
+                                            Completed
+                                        </td>
+                                    }
+                                    else if (order.IsConfirmed)
+                                    {
+                                        <td>
+                                            Confirmed
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="divConfirmedOrder" hidden>
+        <div id="divConfirmOrderList">
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblConfirmedOrder" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer Name</th>
+                            <th>Contact</th>
+                            <th>Customer Address</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders != null)
+                        {
+                            var confirmOrder = orders.Where(ord => ord.IsConfirmed && !ord.IsPayment);
+                            @if (confirmOrder != null && confirmOrder.Count() > 0)
+                            {
+                                @foreach (var order in confirmOrder)
+                                {
+                                    <tr>
+                                        <td>@order.OrderId</td>
+                                        <td>@order.Name</td>
+                                        <td>@order.Phone</td>
+                                        <td>@order.Address</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="divCompletedOrder" hidden>
+        <div id="divCompletedOrderList">
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table id="tblCompletedOrder" class="display table" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Order Id</th>
+                            <th>Customer Name</th>
+                            <th>Contact</th>
+                            <th>Customer Address</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders != null)
+                        {
+                            var completeOrder = orders.Where(ord => ord.IsConfirmed && ord.IsPayment);
+                            @if (completeOrder != null && completeOrder.Count() > 0)
+                            {
+                                @foreach (var order in completeOrder)
+                                {
+                                    <tr>
+                                        <td>@order.OrderId</td>
+                                        <td>@order.Name</td>
+                                        <td>@order.Phone</td>
+                                        <td>@order.Address</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const { ipcRenderer } = require("electron");
+    $(document).ready(function() {
+        $('#tblAllOrder').DataTable({
+            bAutoWidth: false,
+            aoColumns: [
+                { "sWidth": "25%" },
+                { "sWidth": "null" },
+                { "sWidth": "10%" },
+                { "sWidth": "null" },
+                { "sWidth": "10%" }
+            ],
+            dom: 'Bfrtip',
+            buttons: [{
+                extend: 'pdf',
+                title: 'All Order Report',
+                filename: 'all_order_pdf'
+            }, {
+                extend: 'excel',
+                title: 'All Order Report',
+                filename: 'all_order_excel'
+            }, {
+                extend: 'csv',
+                filename: 'all_order_csv'
+            }]
+        });
+
+        $('#tblConfirmedOrder').DataTable({
+            dom: 'Bfrtip',
+            buttons: [{
+                extend: 'pdf',
+                title: 'Confirmed Order',
+                filename: 'confirmed_order_pdf'
+            }, {
+                extend: 'excel',
+                title: 'Confirmed Order',
+                filename: 'confirmed_order_excel'
+            }, {
+                extend: 'csv',
+                filename: 'confirmed_order_csv'
+            }]
+        });
+
+        $('#tblCompletedOrder').DataTable({
+            dom: 'Bfrtip',
+            buttons: [{
+                extend: 'pdf',
+                title: 'Completed Order',
+                filename: 'completed_order_pdf'
+            }, {
+                extend: 'excel',
+                title: 'Completed Order',
+                filename: 'completed_order_excel'
+            }, {
+                extend: 'csv',
+                filename: 'completed_order_csv'
+            }]
+        });
+
+        ipcRenderer.send('get-simple-bar-graph-data', '');
+        ipcRenderer.on('get-simple-bar-graph-data-success', (event, arg) => {
+            var graphData = JSON.parse(arg);
+            $("#example-two").simpleBarGraph({
+                data: graphData,
+                rowsCount: 8,
+                height: "200px",
+                rowCaptionsWidth: "24px",
+                barsColor: "#3D9970"
+            })
+            $("[data-action=random]").click(function() {
+                $("#example-two").simpleBarGraph({
+                    data: graphData,
+                    rowsCount: 8,
+                    height: "200px",
+                    rowCaptionsWidth: "24px",
+                    barsColor: "#3D9970"
+                })
+            })
+        });
+
+    });
+
+    function OnClickDashBoardMenu() {
+        $('#divDashBoard').show();
+        $('#divAllOrder').hide();
+        $('#divCompletedOrder').hide();
+        $('#divConfirmedOrder').hide();
+        ActiveMenu('menuDashBoard');
+    };
+
+    function OnClickAllOrderMenu() {
+        $('#divCompletedOrder').hide();
+        $('#divConfirmedOrder').hide();
+        $('#divDashBoard').hide();
+        $('#divAllOrder').show();
+        ActiveMenu('menuAllOrder');
+    };
+    function OnClickConfirmedOrderMenu() {
+        $('#divAllOrder').hide();
+        $('#divCompletedOrder').hide();
+        $('#divDashBoard').hide();
+        $('#divConfirmedOrder').show();
+        ActiveMenu('menuConfirmedOrder');
+    };
+    function OnClickCompletedOrderMenu() {
+        $('#divAllOrder').hide();
+        $('#divConfirmedOrder').hide();
+        $('#divDashBoard').hide();
+        $('#divCompletedOrder').show();
+        ActiveMenu('menuCompletedOrder');
+    };
+    function ActiveMenu(element) {
+        $('#menu li a.active').toggleClass('active');
+        $('#' + element).addClass('active');
+    };
+
+</script>
+
+<style>
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #333;
+    }
+
+    li {
+        float: left;
+    }
+
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+            li a:hover:not(.active) {
+                background-color: #111;
+            }
+
+    .active {
+        background-color: #04AA6D;
+    }
+</style>
+
+<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+
+    (function() {
+        var ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+</script>

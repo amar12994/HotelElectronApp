@@ -4,24 +4,90 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AppName</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/jquery.dataTables.css" />
+    <link rel="stylesheet" href="~/css/buttons.dataTables.css" />
+    <link rel="stylesheet" href="~/css/font_awesome_all.min.css" />
     <link rel="stylesheet" href="~/css/Layout.css" />
-    <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/jquery.simple-bar-graph.min.css" />
+    <link rel="stylesheet" href="~/css/jqueryscripttop.css" />
+
+
+    <script type="text/javascript" src="~/js/jquery.min.js"></script>
+    <script type="text/javascript" src="~/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="~/js/jszip.min.js"></script>
+    <script type="text/javascript" src="~/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="~/js/pdfmake.min.js"></script>
+    <script type="text/javascript" src="~/js/vfs_fonts.js"></script>
+    <script type="text/javascript" src="~/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="~/js/site.js"></script>
+    <script type="text/javascript" src="~/js/jquery.simple-bar-graph.min.js"></script>
+    <script type="text/javascript" src="~/js/all.min.js"></script>
+
+    <style>
+        .bg-img {
+            /* The image used */
+            background-image: url("../images/antique-cafe-bg.jpg");
+            min-height: 250px;
+            /* Center and scale the image nicely */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            /* Needed to position the navbar */
+            position: relative;
+        }
+
+        .divcontainer {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 34px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 4px 4px rgb(0 0 0 / 10%)
+        }
+
+        .labelfield {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .inputfield {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .buttonfield {
+            background-color: #04AA6D;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+            .buttonfield:hover {
+                background-color: #111
+            }
+    </style>
+
+
 </head>
 <body>
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <a href="../Home/Index">Dashboard</a>
         <a href="../Order/OrderList">Order</a>
-        <a href="../MenuItem/MenuItemList">Menu</a>
-        <a href="#">Report</a>
+        @*<a href="../MenuItem/MenuItemList">Menu</a>*@
+        <a href="../MenuDashBoard/DashBoardMenu">Menu</a>
+        <a href="../Report/Index">Report</a>
     </div>
 
-    <div id="main">
-        <h2>Logo</h2>
-        <p>Click on the element below to open the side navigation menu, and push this content to the right.</p>
+    <div id="main" class="bg-img">
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
     </div>
     <div class="container body-content">

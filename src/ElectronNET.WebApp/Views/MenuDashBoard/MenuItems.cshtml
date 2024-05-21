@@ -1,0 +1,200 @@
+﻿@using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
+@{
+    Layout = "~/Pages/_MenuLayout.cshtml";
+    var data = ElectronD.Instance.Cetegories?.Where(cat => !cat.IsDeleted)?.ToList();
+    var imageBasePath = ElectronD.Instance.ImageBasePath;
+}
+
+<div id="divmenuitem">
+    <div id="divmenuitemlist">
+        <div>
+            <button class="buttonfield" id="btnmenuitem" style="margin-bottom: 5px;float: right;" onclick="onClickMenuItemAddNew()"> Add </button>
+        </div>
+        <br />
+        <br />
+        <div class="table-responsive">
+            <table id="tblMenuItem" class="display table" width="100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Category Id</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (data != null && data.Count > 0)
+                    {
+                        @foreach (var category in data)
+                        {
+                            @if (category.MenuItems != null)
+                            {
+                                @foreach (var menuItem in category.MenuItems.Where(item => !item.IsDeleted))
+                                {
+                                    <tr id="row_@menuItem.Id">
+                                        <td>@menuItem.Id</td>
+                                        <td>@menuItem.Name</td>
+                                        <td>@category.Name</td>
+                                        <td>@menuItem.Price</td>
+                                        <td>
+                                            <button title="Delete" onclick="OnClickDelete('@menuItem.Id','@menuItem.CategoryId')">
+                                                <i class="fas fa-times" style="color:red"></i>
+                                            </button>
+                                            <button title="Edit" onclick="OnClickEdit('@menuItem.Id','@menuItem.CategoryId','@menuItem.Name','@menuItem.Price','@menuItem.Picture')">
+                                                <i class="fas fa-edit" style="font-size:18px;"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="divcontainer" id="divnewmenuitem" hidden>
+        <input id="needToUpdateMenuItemId" type="hidden" />
+        <input id="imageBasePath" type="hidden" value="@imageBasePath" />
+        <label class="labelfield" for="ddcategory">Choose a Category:</label>
+        <select class="inputfield" name="ddcategory" id="ddcategory">
+            @if (data != null && data.Count > 0)
+            {
+                @foreach (var item in data)
+                {
+                    <option value=@item.Id>@item.Name</option>
+                }
+            }
+
+        </select>
+        <label class="labelfield" for="menuItemName">Menu Item Name:</label>
+        <input class="inputfield" type="text" id="menuItemName">
+        <label class="labelfield" for="imageFile">Upload Image:</label>
+        <div class="inputfield" id="fileInput">
+            <input type="file" id="imageFile" accept="image/png, image/jpeg">
+        </div>
+        <div class="alert" id="fileOutput" hidden style="width:450px">
+            <span class="closebtn" onclick="onCloseFileOutput()">&times;</span>
+            <div id="idImage"></div>
+        </div>
+        <label class="labelfield" for="menuItemPrice">Price:</label>
+        <input class="inputfield" type="number" id="menuItemPrice" min="0"><br><br>
+        <input class="buttonfield" id="btnMenuItemSubmit" type="button" value="Submit" onclick="onClickMenuItemSubmit()">
+        <input class="buttonfield" id="btnMenuItemUpdate" type="button" onclick="onClickMenuItemUpdate()" value="Update">
+        <input class="buttonfield" type="button" value="Cancel" onclick="onClickNewMenuItemCancel()">
+    </div>
+</div>
+<style>
+    .alert {
+        padding: 20px;
+        background-color: skyblue;
+        color: white;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+
+<script>
+    const { ipcRenderer } = require("electron");
+
+    $(document).ready(function() {
+        $('#tblMenuItem').dataTable();
+        $('#menu li a.active').toggleClass('active');
+        $('#menuItem').addClass('active');
+    });
+
+    function onClickMenuItemAddNew() {
+        $('#divmenuitemlist').hide();
+        $('#divnewmenuitem').show();
+        $('#fileInput').show();
+        $('#fileOutput').hide();
+
+        $('#btnMenuItemSubmit').show();
+        $('#btnMenuItemUpdate').hide();
+    }
+
+    function onClickMenuItemSubmit() {
+        let menuItem = {
+            CategoryId: $('#ddcategory').val(),
+            Name: $('#menuItemName').val(),
+            Price: $('#menuItemPrice').val(),
+            Picture: $('#imageFile')[0].files[0].path
+        };
+        ipcRenderer.send('add-menu-item', JSON.stringify(menuItem));
+    }
+
+    function onClickMenuItemUpdate() {
+        let menuItemUpdate = {
+            Id: $('#needToUpdateMenuItemId').val(),
+            CategoryId: $('#ddcategory').val(),
+            Name: $('#menuItemName').val(),
+            Price: $('#menuItemPrice').val(),
+            Picture: $('#imageFile')[0].files[0].path
+        };
+        ipcRenderer.send('update-menu-item', JSON.stringify(menuItemUpdate));
+    }
+
+    function OnClickDelete(menuItemId, categoryId) {
+        let deleteObj = {
+            Id: menuItemId,
+            CategoryId: categoryId
+        }
+        ipcRenderer.send('delete-menu-item', JSON.stringify(deleteObj));
+    }
+    function OnClickEdit(menuItemId, categoryId, name, price, picture) {
+        $('#divmenuitemlist').hide();
+        $('#divnewmenuitem').show();
+        $('#fileInput').hide();
+        $('#fileOutput').show();
+
+        $('#btnMenuItemSubmit').hide();
+        $('#btnMenuItemUpdate').show();
+
+        $('#needToUpdateMenuItemId').val(menuItemId);
+        $('#ddcategory').val(categoryId);
+        $('#menuItemName').val(name);
+        $('#menuItemPrice').val(price);
+        let imagepath = $('#imageBasePath').val() + '\\' + picture;
+        let htmlTxt = '<a href=' + imagepath + '>' + picture + '</a>';
+        $('#idImage').html(htmlTxt);
+
+    }
+    function onClickNewMenuItemCancel() {
+        $('#divnewmenuitem').hide();
+        $('#divmenuitemlist').show();
+    }
+
+    function onCloseFileOutput() {
+        $('#fileOutput').hide();
+        $('#fileInput').show();
+    }
+
+    ipcRenderer.on('add-menu-item-success', (event, arg) => {
+        alert("Record Added");
+        ipcRenderer.send('reload-menu', '');
+    });
+    ipcRenderer.on('update-menu-item-success', (event, arg) => {
+        alert("Record Updated");
+        ipcRenderer.send('reload-menu', '');
+    });
+    ipcRenderer.on('delete-menu-item-success', (event, arg) => {
+        alert("Record Deleted");
+        ipcRenderer.send('reload-menu', '');
+    });
+
+</script>

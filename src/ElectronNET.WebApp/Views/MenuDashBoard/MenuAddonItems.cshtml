@@ -1,0 +1,195 @@
+﻿@using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
+@{
+    Layout = "~/Pages/_MenuLayout.cshtml";
+    var data = ElectronD.Instance.Cetegories?.Where(cat => !cat.IsDeleted)?.ToList();
+}
+
+<div id="divAddonItem">
+    <div id="divAddonItemlist">
+        <div>
+            <button class="buttonfield" id="btnAddonItem" style="margin-bottom: 5px;float: right;" onclick="onClickAddonItemAddNew()"> Add </button>
+        </div>
+        <br />
+        <br />
+        <div class="table-responsive">
+            <table id="tblAddonItem" class="display table" width="100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Menu Item</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (data != null && data.Count > 0)
+                    {
+                        @foreach (var category in data)
+                        {
+                            @if (category.MenuItems != null)
+                            {
+                                @foreach (var menuItem in category.MenuItems.Where(item => !item.IsDeleted))
+                                {
+                                    @if (menuItem.AddonItems != null)
+                                    {
+                                        @foreach (var item in menuItem.AddonItems.Where(addon => !addon.IsDeleted))
+                                        {
+                                            <tr>
+                                                <td>@item.Id</td>
+                                                <td>@item.Name</td>
+                                                <td>@menuItem.Name</td>
+                                                <td>@category.Name</td>
+                                                <td>@item.Price</td>
+                                                <td>
+                                                    <button title="Delete" onclick="OnClickDelete('@item.Id','@item.MenuItemId','@item.CategoryId')">
+                                                        <i class="fas fa-times" style="color:red"></i>
+                                                    </button>
+                                                    <button title="Edit" onclick="OnClickEdit('@item.Id','@item.MenuItemId','@item.CategoryId','@item.Name','@item.Price')">
+                                                        <i class="fas fa-edit" style="font-size:18px;"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="divcontainer" id="divNewAddonItem" hidden>
+        <input id="needToUpdateAddonItemId" type="hidden" />
+        <label class="labelfield" for="ddAddonCategory">Choose a Category:</label>
+        <select class="inputfield" name="ddAddonCategory" id="ddAddonCategory">
+            @if (data != null && data.Count > 0)
+            {
+                @foreach (var item in data)
+                {
+                    <option value=@item.Id>@item.Name</option>
+                }
+            }
+        </select>
+        <label class="labelfield" for="ddAddonMenuItem">Choose Item Menu:</label>
+        <select class="inputfield" name="ddAddonMenuItem" id="ddAddonMenuItem">
+            <option value="">Select</option>
+        </select>
+        <label class="labelfield" for="addonItemName">Addon Name:</label>
+        <input class="inputfield" type="text" id="addonItemName">
+        <label class="labelfield" for="addonItemPrice">Price:</label>
+        <input class="inputfield" type="number" id="addonItemPrice" min="0"><br><br>
+        <input class="buttonfield" type="button" id="btnAddonItemSubmit" onclick="onClickAddonItemSubmit()" value="Submit">
+        <input class="buttonfield" type="button" id="btnAddonItemUpdate" onclick="onClickAddonItemUpdate()" value="Update">
+        <input class="buttonfield" type="button" onclick="onClickNewAddonItemCancel()" value="Cancel">
+    </div>
+</div>
+
+<script>
+    const { ipcRenderer } = require("electron");
+
+    $(document).ready(function() {
+        $('#tblAddonItem').dataTable();
+        $('#menu li a.active').toggleClass('active');
+        $('#menuAddon').addClass('active');
+        populateMenuItemBasedOnSelectedCategory();
+    });
+
+    $("#ddAddonCategory").change(function() {
+        populateMenuItemBasedOnSelectedCategory();
+    });
+
+    function onClickAddonItemAddNew() {
+        $('#divAddonItemlist').hide();
+        $('#divNewAddonItem').show();
+
+        $('#btnAddonItemSubmit').show();
+        $('#btnAddonItemUpdate').hide();
+    }
+
+    function onClickAddonItemSubmit() {
+        let addonObj = {
+            CategoryId: $('#ddAddonCategory').val(),
+            MenuItemId: $('#ddAddonMenuItem').val(),
+            Name: $('#addonItemName').val(),
+            Price: $('#addonItemPrice').val()
+        };
+        ipcRenderer.send('add-addon-item', JSON.stringify(addonObj));
+    }
+
+    function onClickAddonItemUpdate() {
+        let addonItemUpdate = {
+            Id: $('#needToUpdateAddonItemId').val(),
+            CategoryId: $('#ddAddonCategory').val(),
+            MenuItemId: $('#ddAddonMenuItem').val(),
+            Name: $('#addonItemName').val(),
+            Price: $('#addonItemPrice').val()
+        };
+        ipcRenderer.send('update-addon-item', JSON.stringify(addonItemUpdate));
+    }
+
+    function OnClickDelete(addonId, menuItemId, categoryId) {
+        let deleteObj = {
+            Id: addonId,
+            MenuItemId: menuItemId,
+            CategoryId: categoryId
+        }
+        ipcRenderer.send('delete-addon-item', JSON.stringify(deleteObj));
+    }
+    function OnClickEdit(addonId, menuItemId, categoryId, name, price) {
+        $('#divAddonItemlist').hide();
+        $('#divNewAddonItem').show();
+
+        $('#btnAddonItemSubmit').hide();
+        $('#btnAddonItemUpdate').show();
+
+        $('#needToUpdateAddonItemId').val(addonId);
+        $('#ddAddonCategory').val(categoryId);
+        //populateMenuItemBasedOnSelectedCategory();
+        $('#ddAddonMenuItem').val(menuItemId);
+        $('#addonItemName').val(name);
+        $('#addonItemPrice').val(price);
+    }
+
+    function onClickNewMenuItemCancel() {
+        $('#divnewmenuitem').hide();
+        $('#divmenuitemlist').show();
+    }
+    function populateMenuItemBasedOnSelectedCategory() {
+        let categoryId = $('#ddAddonCategory').val();
+        ipcRenderer.send('load-menu-basedon-category', categoryId);
+    }
+
+    ipcRenderer.on('load-menu-basedon-category-success', (event, arg) => {
+        var menuItems = JSON.parse(arg);
+        $('#ddAddonMenuItem').empty();
+        if (menuItems != null) {
+            for (var j = 0; j < menuItems.length; j++) {
+                $("#ddAddonMenuItem").append("<option value=" + menuItems[j].Id + ">" + menuItems[j].Name + "</option>");
+            }
+        }
+    });
+    ipcRenderer.on('add-addon-item-success', (event, arg) => {
+        alert("Record Added");
+        ipcRenderer.send('reload-addon-item', '');
+    });
+    ipcRenderer.on('update-addon-item-success', (event, arg) => {
+        alert("Record Updated");
+        ipcRenderer.send('reload-addon-item', '');
+    });
+    ipcRenderer.on('delete-addon-item-success', (event, arg) => {
+        alert("Record Deleted");
+        ipcRenderer.send('reload-addon-item', '');
+    });
+
+    function onClickNewAddonItemCancel() {
+        $('#divNewAddonItem').hide();
+        $('#divAddonItemlist').show();
+    }
+
+</script>

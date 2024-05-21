@@ -8,6 +8,7 @@ namespace ElectronNET.WebApp.Models
         public Guid Id { get; set; }
         public string Name { get; set; }
         public List<MenuItem> MenuItems { get; set; }
+        public bool IsDeleted { get; set; }
     }
     public class MenuItem
     {
@@ -16,7 +17,9 @@ namespace ElectronNET.WebApp.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public float Price { get; set; }
+        public string Picture { get; set; }
         public List<AddonItem> AddonItems { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
     }
     public class AddonItem
@@ -27,6 +30,6 @@ namespace ElectronNET.WebApp.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public float Price { get; set; }
-
+        public bool IsDeleted { get; set; }
     }
 }

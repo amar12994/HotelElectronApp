@@ -1,0 +1,25 @@
+﻿@{
+    Layout = "~/Pages/_Layout.cshtml";
+}
+
+
+<div>
+    <div>
+        <ul id="menu">
+            <li><a id="menuDashBoard" href="../MenuDashBoard/DashBoardMenu">DashBoard</a></li>
+            <li><a id="menuCategory" href="../MenuDashBoard/MenuCategory">Category</a></li>
+            <li><a id="menuItem" href="../MenuDashBoard/MenuItems">Menu Item</a></li>
+            <li><a id="menuAddon" href="../MenuDashBoard/MenuAddonItems">Addon</a></li>
+            <li><a id="menucart" href="../MenuDashBoard/MenuItems" style="background: mediumvioletred;"><i class="fas fa-shopping-cart"></i>Cart</a></li>
+        </ul>
+    </div>
+    <div>
+    </div>
+    <br />
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="~/css/menuLayout.css" />

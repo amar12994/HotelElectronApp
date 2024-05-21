@@ -8,9 +8,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ElectronHostHook\**" />
+    <Compile Remove="wwwroot\assets\**" />
     <Content Remove="ElectronHostHook\**" />
+    <Content Remove="wwwroot\assets\**" />
     <EmbeddedResource Remove="ElectronHostHook\**" />
+    <EmbeddedResource Remove="wwwroot\assets\**" />
     <None Remove="ElectronHostHook\**" />
+    <None Remove="wwwroot\assets\**" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Controllers\ManageWindowsController.cs" />
@@ -29,9 +33,6 @@
     <PackageReference Include="SocketIOClient.Newtonsoft.Json" Version="3.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ElectronNET.API\ElectronNET.API.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <None Update="Assets\electron.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -45,9 +46,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Pages\" />
-    <Folder Include="wwwroot\images\" />
-    <Folder Include="wwwroot\js\" />
     <Folder Include="wwwroot\lib\bootstrap\" />
     <Folder Include="wwwroot\lib\bootstrap\dist\css\" />
     <Folder Include="wwwroot\lib\bootstrap\dist\js\" />

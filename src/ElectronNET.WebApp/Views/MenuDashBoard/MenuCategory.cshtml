@@ -1,0 +1,122 @@
+﻿@{
+    Layout = "~/Pages/_MenuLayout.cshtml";
+    @using ElectronD = ElectronNET.WebApp.Domain.ElectronD;
+    @using JsonConvert=Newtonsoft.Json.JsonConvert;
+    var data = ElectronD.Instance.Cetegories;
+    var toastrMessage = await Task.FromResult(JsonConvert.SerializeObject(ElectronD.Instance.ToastrMessage));
+}
+
+<div id="divcategory">
+    <div id="divcategoryList">
+        <input id="idtoastrMessage" type="hidden" value="@toastrMessage">
+        <div>
+            <button class="buttonfield" id="btncategory" style="margin-bottom: 5px;float: right;" onclick="onClickCategoryAddNew()"> Add </button>
+        </div>
+        <br />
+        <br />
+        <div class="table-responsive">
+            <table id="tblCategory" class="display table" width="100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (data != null && data.Count > 0)
+                    {
+                        @foreach (var item in data.Where(cat => !cat.IsDeleted))
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.Name</td>
+                                <td>
+                                    <button title="Delete" onclick="onClickDelete('@item.Id')">
+                                        <i class="fas fa-times" style="color:red"></i>
+                                    </button>
+                                    <button title="Edit" onclick="onClickEdit('@item.Id','@item.Name')">
+                                        <i class="fas fa-edit" style="font-size:18px;"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="divcontainer" id="divnewcategory" hidden>
+        <label class="labelfield" for="cname">Category Name:</label>
+        <input class="inputfield" type="text" id="cname">
+        <input class="buttonfield" id="idsubmit" type="submit" value="Submit" onclick="onClickNewCategorySubmit()">
+        <input class="buttonfield" id="idupdate" type="button" value="Update" onclick="onClickNewCategoryUpdate()">
+        <input class="buttonfield" type="button" value="Cancel" onclick="onClickNewCategoryCancel()">
+    </div>
+</div>
+
+<script>
+    const { ipcRenderer } = require("electron");
+    var categoryIdWhichNeedToUpdate;
+
+    $(document).ready(function() {
+        $('#tblCategory').dataTable();
+        $('#menu li a.active').toggleClass('active');
+        $('#menuCategory').addClass('active');
+    });
+
+    function onClickCategoryAddNew() {
+        $('#cname').val('');
+        $('#divcategoryList').hide();
+        $('#divnewcategory').show();
+        $('#idsubmit').show();
+        $('#idupdate').hide();
+    }
+    function onClickNewCategorySubmit() {
+        let cname = $('#cname').val();
+        ipcRenderer.send('new-category', cname);
+    }
+    function onClickNewCategoryCancel() {
+        $('#divcategoryList').show();
+        $('#divnewcategory').hide();
+    }
+
+    function onClickEdit(categoryId, categoryName) {
+        categoryIdWhichNeedToUpdate = categoryId;
+        $('#cname').val(categoryName);
+        $('#divcategoryList').hide();
+        $('#divnewcategory').show();
+
+        $('#idsubmit').hide();
+        $('#idupdate').show();
+    }
+
+    function onClickNewCategoryUpdate() {
+        let obj = {
+            Id: categoryIdWhichNeedToUpdate,
+            Name: $('#cname').val()
+        };
+        ipcRenderer.send('edit-category', JSON.stringify(obj));
+    }
+
+    function onClickDelete(categoryId) {
+        ipcRenderer.send('delete-category', categoryId);
+    }
+
+    ipcRenderer.on('new-category-success', (event, arg) => {
+        alert("Record Added");
+        ipcRenderer.send('reload-category', '');
+    });
+
+    ipcRenderer.on('edit-category-success', (event, arg) => {
+        alert("Record Updated");
+        ipcRenderer.send('reload-category', '');
+    });
+    ipcRenderer.on('delete-category-success', (event, arg) => {
+        alert("Record Deleted");
+        ipcRenderer.send('reload-category', '');
+    });
+
+</script>
